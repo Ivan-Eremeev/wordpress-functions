@@ -1,5 +1,13 @@
 <?php 
 
+	//** Задать константы путей в папки **//
+
+	define('MY_HOME_DIR', get_template_directory_uri()); // Путь в корневую папку темы
+	define('MY_CSS_DIR', LSTK_HOME_DIR .'/assets/css/'); // Путь в папку стилей
+	define('MY_JS_DIR', LSTK_HOME_DIR .'/assets/js/'); // Путь в папку скриптов
+	define('MY_FONTS_DIR', LSTK_HOME_DIR .'/assets/fonts/'); // Путь в папку шрифтов
+	define('MY_IMG_DIR', LSTK_HOME_DIR .'/assets/img/'); // Путь в папку шрифтов
+
 	//** Функции wordpress **//
 
 	get_header(); // Подключает файл header.php
@@ -24,11 +32,11 @@
 	function theme_add_scripts()
 	{
 		wp_enqueue_style( 'style', get_stylesheet_uri() ); // Подключение style.css
-		wp_enqueue_style( 'mystyle', get_template_directory_uri() . '/assets/css/mystyle.css' ); // Подключение других стилей
-		wp_enqueue_script( 'scripts', get_template_directory_uri() . '/assets/js/scripts.js' ); // Подключение скриптов  
+		wp_enqueue_style( 'mystyle', LSTK_CSS_DIR . 'mystyle.css' ); // Подключение других стилей
+		wp_enqueue_script( 'scripts', LSTK_JS_DIR . 'scripts.js' ); // Подключение скриптов  
 		// jquery регистрируется в WP по умолчанию. Но старая версия. Поэтому регистрируем свою
 		wp_deregister_script( 'jquery' ); // Удаляет ранее зарегистрированный скрипт
-		wp_register_script( 'jquery', get_template_directory_uri() . '/assets/js/jquery-3.2.1.min.js' ); // Регистрирует новый скрипт
+		wp_register_script( 'jquery', LSTK_JS_DIR . 'jquery-3.2.1.min.js' ); // Регистрирует новый скрипт
 		wp_enqueue_script( 'jquery' ); // Подключает зарегистрированный JQuery
 
 	//** Регистрация и вывод меню **//
