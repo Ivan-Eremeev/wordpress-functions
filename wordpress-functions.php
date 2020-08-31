@@ -2,22 +2,22 @@
 
 	//** Создаем константы путей **//
 
-	define('MY_HOME_DIR', get_template_directory_uri()); // Путь в корневую папку темы
-	define('MY_CSS_DIR', LSTK_HOME_DIR .'/assets/css/'); // Путь в папку стилей
-	define('MY_JS_DIR', LSTK_HOME_DIR .'/assets/js/'); // Путь в папку скриптов
-	define('MY_FONTS_DIR', LSTK_HOME_DIR .'/assets/fonts/'); // Путь в папку шрифтов
-	define('MY_IMG_DIR', LSTK_HOME_DIR .'/assets/img/'); // Путь в папку шрифтов
+	define('NAMETHEME_HOME_DIR', get_template_directory_uri()); // Путь в корневую папку темы
+	define('NAMETHEME_CSS_DIR', NAMETHEME_HOME_DIR .'/assets/css/'); // Путь в папку стилей
+	define('NAMETHEME_JS_DIR', NAMETHEME_HOME_DIR .'/assets/js/'); // Путь в папку скриптов
+	define('NAMETHEME_FONTS_DIR', NAMETHEME_HOME_DIR .'/assets/fonts/'); // Путь в папку шрифтов
+	define('NAMETHEME_IMG_DIR', NAMETHEME_HOME_DIR .'/assets/img/'); // Путь в папку шрифтов
 	// Использовать с echo
 
 	//** Функции wordpress **//
 
 	get_header(); // Подключает файл header.php
 	get_footer();	// Подключает файл footer.php
+	get_sidebar(); // Подключает файл sidebar.php
 	get_template_directory_uri(); // Возвращает путь к папке темы
 	get_stylesheet_uri(); // Возвращает путь к файлу style.css
 	bloginfo('name'); // Возвращает имя сайта
 	echo home_url(); // Возвращает адрес сайта
-	add_theme_support( 'title-tag' ); // Вывести все title автоматически
 	add_filter( 'show_admin_bar', '__return_false' ); // Убить админ панель
 	language_attributes(); // Вывести атрибут языка сайта
 	the_custom_logo(); // Вывести логотип
@@ -31,24 +31,27 @@
 
 	//** Подключение стилей и скриптов **//
 
-	add_action( 'wp_enqueue_scripts', function() // Вызов функции после хука подключения скриптов
+	add_action( 'wp_enqueue_scripts', 'nametheme_scripts' ); // Вызов функции после хука подключения скриптов
+	function nametheme_scripts()
 	{
 		wp_enqueue_style( 'style', get_stylesheet_uri() ); // Подключение style.css
-		wp_enqueue_style( 'mystyle', LSTK_CSS_DIR . 'mystyle.css' ); // Подключение других стилей
-		wp_enqueue_script( 'scripts', LSTK_JS_DIR . 'scripts.js' ); // Подключение скриптов  
+		wp_enqueue_style( 'mystyle', NAMETHEME_CSS_DIR . 'mystyle.css' ); // Подключение других стилей
+		wp_enqueue_script( 'scripts', NAMETHEME_JS_DIR . 'scripts.js' ); // Подключение скриптов  
 		// jquery регистрируется в WP по умолчанию. Но старая версия. Поэтому регистрируем свою
 		wp_deregister_script( 'jquery' ); // Удаляет ранее зарегистрированный скрипт
-		wp_register_script( 'jquery', LSTK_JS_DIR . 'jquery-3.2.1.min.js' ); // Регистрирует новый скрипт
+		wp_register_script( 'jquery', NAMETHEME_JS_DIR . 'jquery-3.2.1.min.js' ); // Регистрирует новый скрипт
 		wp_enqueue_script( 'jquery' ); // Подключает зарегистрированный JQuery
-	});
+	};
 
-	//** Вызов функций Wordpress после инициализации темы **//
+	//** Настройки темы **//
 
-	add_action( 'after_setup_theme', function() 
+	add_action( 'after_setup_theme', 'nametheme_setup');
+	function nametheme_setup()
 	{
-		register_nav_menu( 'top', 'Верхнее меню' ); // Регистрация области для меню
+		add_theme_support( 'title-tag' ); // Вывести все title автоматически
 		add_theme_support( 'custom-logo' ); // Включение изменяемого логотипа
-	});
+		register_nav_menu( 'top', 'Верхнее меню' ); // Регистрация области для меню
+	};
 
 	//** Вывод меню **//
 
@@ -69,6 +72,22 @@
 		'fallback_cb'     => 'wp_page_menu', // Функция для обработки вывода, если никакое меню не найдено. Передает все аргументы $args указанной тут функции. Установите пустую строку '' или '__return_empty_string', чтобы ничего не выводилось, если меню нет.
 		'depth'           => 0, // До какого уровня вложенности нужно показывать ссылки (элементы меню). 0 - все уровни.
 		'walker'          => '', // Класса, который будет использоваться для построения меню. Нужно указывать объект, а не строку, например new My_Menu_Walker(). По умолчанию: Walker_Nav_Menu().
-	] ); 
+	] );
+
+	//* Регистрация сайдбара *//
+
+	add_action( 'widgets_init', 'register_my_widgets' );
+	function register_my_widgets(){
+		register_sidebar( array(
+			'name'          => sprintf(__('Sidebar %d'), $i ), // Название панели виджетов
+			'id'            => "sidebar-$i", // Идентификатор виджета
+			'description'   => '', // Текст описывающий где будет выводиться панель виджетов
+			'class'         => '', // CSS класс, который будет добавлен главному HTML тегу панели виджетов
+			'before_widget' => '<li id="%1$s" class="widget %2$s">', // HTML код, который будет расположен перед каждым виджетом в панели
+			'after_widget'  => "</li>\n", // HTML код, который будет расположен после каждого виджета в панели
+			'before_title'  => '<h2 class="widgettitle">', // HTML код перед заголовком виджета
+			'after_title'   => "</h2>\n", // HTML код после заголовка виджета
+		) );
+	};
 
 ?>
