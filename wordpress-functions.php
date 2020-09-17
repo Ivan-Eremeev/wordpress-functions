@@ -35,6 +35,9 @@
 	get_template_part(); // Ищет и подключает указанный файл темы. Похожа на PHP функцию include(), только не нужно указывать путь до темы
 	get_post_format(); // Возвращает формат (тип) поста, например: quote, status, video, audio
 	get_template_part( 'dir/post', get_post_format() ); // Подключит файл с именем типа записи, внутри которой используется. Например post-video.php
+	echo get_num_queries(); // Получает количество запросов которое было сделано к базе данных WordPress до момента вызова этой фукнции
+	echo do_shortcode(); // Вывести шорткод через php файл
+	the_terms() // Выводит список ссылок на термины (элементы таксономии), относящиеся к указанному посту
 
 	//** Хуки wordpress **//
 
@@ -252,5 +255,48 @@
 	<?php
 	}
 	wp_reset_postdata(); // сброс
+
+	//* Добавляет (регистрирует) новую (пользовательскую) таксономию *//
+
+	add_action( 'init', 'create_taxonomy' );
+	function create_taxonomy(){
+
+		register_taxonomy( 'nametheme_nametaxonomy', [ 'post' ], [ 
+			'label'                 => '', // определяется параметром $labels->name
+			'labels'                => [
+				'name'              => 'Таксономия',
+				'singular_name'     => 'Таксономия',
+				'search_items'      => 'Найти таксономию',
+				'all_items'         => 'Все таксономии',
+				'view_item '        => 'Смотреть таксономию',
+				'parent_item'       => 'Родительская таксономия',
+				'parent_item_colon' => 'Родительская таксономия:',
+				'edit_item'         => 'Изменить таксономию',
+				'update_item'       => 'Обновить таксономию',
+				'add_new_item'      => 'Добавиь новую таксономию',
+				'new_item_name'     => 'Новое ися таксономии',
+				'menu_name'         => 'Таксономия',
+			],
+			'description'           => '', // описание таксономии
+			'public'                => true,
+			// 'publicly_queryable'    => null, // равен аргументу public
+			// 'show_in_nav_menus'     => true, // равен аргументу public
+			// 'show_ui'               => true, // равен аргументу public
+			// 'show_in_menu'          => true, // равен аргументу show_ui
+			// 'show_tagcloud'         => true, // равен аргументу show_ui
+			// 'show_in_quick_edit'    => null, // равен аргументу show_ui
+			'hierarchical'          => false, // true - таксономия будет древовидная (как категории). false - будет не древовидная (как метки)
+
+			'rewrite'               => true, // false - отключит перезапись
+			//'query_var'             => $taxonomy, // название параметра запроса
+			'capabilities'          => array(), // Массив прав для этой таксономии
+			'meta_box_cb'           => null, // html метабокса. callback: `post_categories_meta_box` или `post_tags_meta_box`. false — метабокс отключен.
+			'show_admin_column'     => false, // авто-создание колонки таксы в таблице ассоциированного типа записи. (с версии 3.5)
+			'show_in_rest'          => null, // добавить в REST API
+			'rest_base'             => null, // $taxonomy
+			// '_builtin'              => false,
+			//'update_count_callback' => '_update_post_term_count',
+		] );
+	}
 
 ?>
