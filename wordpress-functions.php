@@ -6,7 +6,7 @@
 	define('NAMETHEME_CSS_DIR', NAMETHEME_HOME_DIR .'/assets/css/'); // Путь в папку стилей
 	define('NAMETHEME_JS_DIR', NAMETHEME_HOME_DIR .'/assets/js/'); // Путь в папку скриптов
 	define('NAMETHEME_FONTS_DIR', NAMETHEME_HOME_DIR .'/assets/fonts/'); // Путь в папку шрифтов
-	define('NAMETHEME_IMG_DIR', NAMETHEME_HOME_DIR .'/assets/img/'); // Путь в папку шрифтов
+	define('NAMETHEME_IMG_DIR', NAMETHEME_HOME_DIR .'/assets/img/'); // Путь в папку изображений
 	// Использовать с echo
 
 	//** Функции wordpress **//
@@ -38,13 +38,19 @@
 	echo get_num_queries(); // Получает количество запросов которое было сделано к базе данных WordPress до момента вызова этой фукнции
 	echo do_shortcode(); // Вывести шорткод через php файл
 	the_terms() // Выводит список ссылок на термины (элементы таксономии), относящиеся к указанному посту
+	?>
+	<p> Всего запросов к базе "<strong><?php echo get_num_queries(); ?></strong>", время загрузки "<strong><?php echo timer_stop(); ?>"</strong>".</p>
+	<?php
+	get_post_meta(); // Получает значение произвольного поля записи (поста).
+	the_field(); // Получает значение произвольного поля записи (поста) (плагин Advanced Castom Fields).
+	echo rwmb_meta(); // Получает значение произвольного поля записи (поста) (плагин MetaBox).
 
 	//** Хуки wordpress **//
 
 	wp_head(); // Обязательный хук в header.php
 	wp_footer(); // Обязательный хук в footer.php
 	wp_enqueue_scripts; // Хук срабатывает при подключении wordpess-ом скриптов. Принято вешать на этот хук свои скрипты и стили. Прикреплен к хуку wp-head().
-	after_setup_theme // Это один из первых хуков, срабатывает прямо перед инициализацией WordPress, перед хуком init.
+	after_setup_theme; // Это один из первых хуков, срабатывает прямо перед инициализацией WordPress, перед хуком init.
 
 	//** Подключение стилей и скриптов **//
 
@@ -195,9 +201,9 @@
 	//* Свои action и shortcode *//
 
 	add_action( 'my_action', 'my_function' ); // создать свое действие
-	do_action( 'my_action' ) // запустить свое действие
+	do_action( 'my_action' ); // запустить свое действие
 	add_shortcode( 'my_shortcode', 'my_function' ); // создать свой шорткод
-	[my_shortcode] // запустить свой шорткод. запускается из админки
+	[my_shortcode]; // запустить свой шорткод. запускается из админки
 
 	//* Создать новый тип записи или изменить имеющийся *//
 	
@@ -297,6 +303,17 @@
 			// '_builtin'              => false,
 			//'update_count_callback' => '_update_post_term_count',
 		] );
-	}
+	};
+
+	## Выводит данные о кол-ве запросов к БД, время выполнения скрипта и размер затраченной памяти.
+	add_action( 'admin_footer_text', 'wp_usage' ); // в подвале админки
+	add_action( 'wp_footer', 'wp_usage' );         // в подвале сайта
+	function wp_usage(){
+		echo sprintf( '<p>Запросов к базе: "%d" за "%s" сек. "%s" MB</p>',
+			get_num_queries(),
+			timer_stop( 0, 3 ),
+			round( memory_get_peak_usage()/1024/1024, 2 )
+		);
+	};
 
 ?>
