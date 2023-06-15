@@ -316,4 +316,110 @@
 		);
 	};
 
+	//* Отключить обновление плагина *//
+	add_filter( 'site_transient_update_plugins', 'filter_plugin_updates' );
+	function filter_plugin_updates( $value ) {
+		unset( $value->response['advanced-custom-fields-pro-master/acf.php'] );
+		return $value;
+	}
+
+	## Отключает Гутенберг (новый редактор блоков в WordPress).
+	## ver: 1.2
+	if( 'disable_gutenberg' ){
+		remove_theme_support( 'core-block-patterns' ); // WP 5.5
+
+		add_filter( 'use_block_editor_for_post_type', '__return_false', 100 );
+
+		// отключим подключение базовых css стилей для блоков
+		// ВАЖНО! когда выйдут виджеты на блоках или что-то еще, эту строку нужно будет комментировать
+		remove_action( 'wp_enqueue_scripts', 'wp_common_block_scripts_and_styles' );
+
+		// Move the Privacy Policy help notice back under the title field.
+		add_action( 'admin_init', function(){
+			remove_action( 'admin_notices', [ 'WP_Privacy_Policy_Content', 'notice' ] );
+			add_action( 'edit_form_after_title', [ 'WP_Privacy_Policy_Content', 'notice' ] );
+		} );
+	}
+
+	// Создать header и footer ACF
+	add_action('acf/init', 'my_acf_op_init');
+	function my_acf_op_init() {
+		if( function_exists('acf_add_options_page') ) {
+
+			acf_add_options_page(array(
+					'page_title'    => 'Хедер',
+					'menu_title'    => 'Хедер',
+					'menu_slug'     => 'theme-header-settings',
+					'position'			=> '4.1',
+					'icon_url'			=> 'dashicons-admin-page'
+			));
+
+			acf_add_options_page(array(
+					'page_title'    => 'Футер',
+					'menu_title'    => 'Футер',
+					'menu_slug'     => 'theme-footer-settings',
+					'position'			=> '58.8',
+					'icon_url'			=> 'dashicons-admin-page'
+			));
+			
+		}
+	}
+
+	// Удалить пункты из меню админки
+	add_action( 'admin_menu', 'remove_menus' );
+	function remove_menus(){
+
+		remove_menu_page( 'index.php' );                  // Консоль
+		remove_menu_page( 'edit.php' );                   // Записи
+		remove_menu_page( 'upload.php' );                 // Медиафайлы
+		remove_menu_page( 'edit.php?post_type=page' );    // Страницы
+		remove_menu_page( 'edit-comments.php' );          // Комментарии
+		remove_menu_page( 'themes.php' );                 // Внешний вид
+		remove_menu_page( 'plugins.php' );                // Плагины
+		remove_menu_page( 'users.php' );                  // Пользователи
+		remove_menu_page( 'tools.php' );                  // Инструменты
+		remove_menu_page( 'options-general.php' );        // Параметры
+		remove_menu_page( 'edit.php?post_type=acf-field-group' );        // Группы полей (ACF)
+
+	}
+
+	// Добавить пункты в меню админки
+	add_action( 'admin_menu', 'register_my_page' );
+	function register_my_page()
+	{
+		add_menu_page('Менюшки сайта', 'Менюшки сайта', 'edit_posts', 'nav-menus.php', '', 'dashicons-menu', 58.9);
+	}
+
+	// Регистрация скриптов
+	add_action( 'init', 'register_scripts' );
+	function register_scripts(){
+		// jQuery
+		wp_register_script( 'milo-jquery', get_template_directory_uri() . '/assets/js/jquery.min.js', array(), _S_VERSION, true );
+	}
+
+	// Добавить в админку колонку с id записи или страницы
+	function true_id($args){
+		$args['post_page_id'] = 'ID';
+		return $args;
+	}
+	function true_custom($column, $id){
+		if($column === 'post_page_id'){
+			echo $id;
+		}
+	}
+	add_filter('manage_pages_columns', 'true_id', 5);
+	add_action('manage_pages_custom_column', 'true_custom', 5, 2);
+	add_filter('manage_posts_columns', 'true_id', 5);
+	add_action('manage_posts_custom_column', 'true_custom', 5, 2);
+
+	## Удаление базовых элементов (ссылок) из тулбара
+	add_action( 'add_admin_bar_menus', function(){	
+		if ( ! is_network_admin() && ! is_user_admin() ) {
+			// комментарии
+			remove_action( 'admin_bar_menu', 'wp_admin_bar_comments_menu', 60 );
+			// добавить запись, страницу, медиафайл и т.д.
+			remove_action( 'admin_bar_menu', 'wp_admin_bar_new_content_menu', 70 );
+		}
+	});
+
 ?>
